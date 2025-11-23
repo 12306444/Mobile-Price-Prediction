@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Price Predictor | AI-Powered Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --secondary: #06b6d4;
+            --accent: #8b5cf6;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --success: #10b981;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --shadow: 0 8px 32px 0 rgba(2, 6, 23, 0.4);
+            --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        [data-theme="light"] {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --secondary: #0891b2;
+            --accent: #7c3aed;
+            --dark: #f8fafc;
+            --darker: #f1f5f9;
+            --light: #1e293b;
+            --gray: #475569;
+            --success: #059669;
+            --glass: rgba(30, 41, 59, 0.08);
+            --glass-border: rgba(30, 41, 59, 0.15);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 25%),
+                radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        [data-theme="light"] body::before {
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 25px;
+        }
+
+        /* Navigation */
+        nav {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.6rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 35px;
+        }
+
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            padding: 8px 0;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-light);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .theme-toggle {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(31, 38, 135, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 0 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientShift 5s ease infinite;
+            background-size: 200% 200%;
+            text-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+            line-height: 1.1;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--gray);
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .model-accuracy {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            margin-top: 10px;
+        }
+
+        .accuracy-badge {
+            color: var(--success);
+            font-weight: 700;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* Main Content */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+
+        @media (max-width: 1100px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 3.2rem;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            backdrop-filter: blur(15px);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(31, 38, 135, 0.4);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Feature Importance */
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 12px;
+            border-radius: 12px;
+            transition: var(--transition);
+        }
+
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .feature-name {
+            width: 160px;
+            font-weight: 600;
+            text-transform: capitalize;
+            font-size: 1rem;
+        }
+
+        .feature-bar {
+            flex: 1;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 0 20px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0;
+            transition: width 1.5s ease-out;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        .feature-percent {
+            width: 70px;
+            text-align: right;
+            font-weight: 700;
+            color: var(--primary-light);
+            font-size: 1rem;
+        }
+
+        /* Form Styles */
+        .form-container {
+            max-height: 550px;
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+
+        .form-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .form-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .form-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--light);
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: var(--light);
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 16px 28px;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.7s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            width: 100%;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-glow {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.6); }
+            70% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+
+        /* Result Section */
+        .result-container {
+            text-align: center;
+            margin-top: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .result-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15));
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 18px;
+            padding: 30px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+        }
+
+        .result-label {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+        }
+
+        .result-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Expandable Section */
+        .expandable {
+            margin-bottom: 35px;
+        }
+
+        .expandable-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .expandable-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .expandable-content.show {
+            max-height: 500px;
+        }
+
+        .expandable-icon {
+            transition: transform 0.4s ease;
+        }
+
+        .expandable-header.active .expandable-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Developer Section */
+        .developer-section {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 50px 0 30px;
+            backdrop-filter: blur(15px);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .developer-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .developer-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .developer-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .developer-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .developer-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .developer-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .developer-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--gray);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-light);
+        }
+
+        .copyright {
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Floating Elements */
+        .floating {
+            position: absolute;
+            z-index: -1;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+            animation: float 8s ease-in-out infinite;
+            filter: blur(1px);
+        }
+
+        .floating-1 {
+            width: 250px;
+            height: 250px;
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .floating-2 {
+            width: 180px;
+            height: 180px;
+            top: 60%;
+            right: 8%;
+            animation-delay: 2s;
+        }
+
+        .floating-3 {
+            width: 120px;
+            height: 120px;
+            bottom: 20%;
+            left: 12%;
+            animation-delay: 4s;
+        }
+
+        .floating-4 {
+            width: 150px;
+            height: 150px;
+            top: 20%;
+            right: 15%;
+            animation-delay: 6s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg) scale(1); }
+            50% { transform: translateY(-25px) rotate(5deg) scale(1.05); }
+            100% { transform: translateY(0) rotate(0deg) scale(1); }
+        }
+
+        /* AI Assistant */
+        .ai-assistant {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+            z-index: 1000;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .ai-assistant:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .ai-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--primary);
+            opacity: 0.6;
+            animation: pulse-ring 2s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            70% { transform: scale(1.5); opacity: 0; }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: rgba(15, 23, 42, 0.95);
+            color: #fff;
+            text-align: center;
+            border-radius: 10px;
+            padding: 12px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .dashboard {
+                gap: 25px;
+            }
+            
+            .card {
+                padding: 25px;
+            }
+            
+            .developer-info {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Background Elements -->
+    <div class="floating floating-1"></div>
+    <div class="floating floating-2"></div>
+    <div class="floating floating-3"></div>
+    <div class="floating floating-4"></div>
+
+    <!-- Navigation -->
+    <div class="container">
+        <nav>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                MobilePrice.ai
+            </div>
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">How It Works</a>
+                <a href="#">API</a>
+                <a href="#">Pricing</a>
+                <a href="#">Contact</a>
+            </div>
+            <div class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="container">
+        <div class="hero">
+            <h1>AI-Powered Mobile Price Prediction</h1>
+            <p>Advanced machine learning algorithm that analyzes 20+ technical specifications to accurately predict mobile phone price categories with 92.4% accuracy</p>
+            <div class="model-accuracy">
+                <span>Model Accuracy:</span>
+                <span class="accuracy-badge">92.4%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="container">
+        <div class="dashboard">
+            <!-- Left Column -->
+            <div>
+                <!-- How It Works -->
+                <div class="card expandable">
+                    <div class="expandable-header">
+                        <div class="card-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="card-title">How This AI Model Works</div>
+                        <div class="expandable-icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="expandable-content">
+                        <p>This advanced machine learning model analyzes 20 technical specifications to predict the price category of mobile phones. The model was trained on thousands of mobile phone datasets and uses ensemble algorithms to identify complex patterns and correlations between specifications and pricing.</p>
+                        <p style="margin-top: 15px;">Key factors like RAM, battery power, camera quality, screen resolution, and processing power are weighted according to their impact on the final price. Higher values in these specifications typically result in higher price categories.</p>
+                        <p style="margin-top: 15px;">The model uses a gradient boosting algorithm that combines multiple weak predictors to create a strong predictive model with high accuracy and generalization capabilities.</p>
+                    </div>
+                </div>
+
+                <!-- Feature Importance -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="card-title">Feature Importance</div>
+                    </div>
+                    <ul class="feature-list" id="imp-list">
+                        <!-- Feature items will be populated by JavaScript -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- Input Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-sliders-h"></i>
+                        </div>
+                        <div class="card-title">Mobile Specifications</div>
+                    </div>
+
+                    <button class="btn btn-secondary btn-glow" onclick="autoFill()">
+                        <i class="fas fa-random"></i>
+                        Auto-Fill Random Specs
+                    </button>
+
+                    <div class="form-container">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Battery Power (mAh)
+                                    <span class="tooltiptext">The total energy storage capacity of the battery</span>
+                                </label>
+                                <input type="number" id="battery_power" class="form-input" placeholder="e.g., 2000">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Bluetooth
+                                    <span class="tooltiptext">Whether the device has Bluetooth capability (0=No, 1=Yes)</span>
+                                </label>
+                                <input type="number" id="blue" class="form-input" placeholder="0 or 1" min="0" max="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Clock Speed (GHz)
+                                    <span class="tooltiptext">The speed at which the processor executes instructions</span>
+                                </label>
+                                <input type="number" id="clock_speed" class="form-input" placeholder="e.g., 2.5" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Dual SIM
+                                    <span class="tooltiptext">Whether the device supports two SIM cards (0=No, 1=Yes)</span>
+                                </label>
+                                <input type="number" id="dual_sim" class="form-input" placeholder="0 or 1" min="0" max="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Front Camera (MP)
+                                    <span class="tooltiptext">Resolution of the front-facing camera in megapixels</span>
+                                </label>
+                                <input type="number" id="fc" class="form-input" placeholder="e.g., 8">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    4G Support
+                                    <span class="tooltiptext">Whether the device supports 4G networks (0=No, 1=Yes)</span>
+                                </label>
+                                <input type="number" id="four_g" class="form-input" placeholder="0 or 1" min="0" max="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Internal Memory (GB)
+                                    <span class="tooltiptext">The built-in storage capacity of the device</span>
+                                </label>
+                                <input type="number" id="int_memory" class="form-input" placeholder="e.g., 64">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Mobile Depth (cm)
+                                    <span class="tooltiptext">The thickness of the mobile device</span>
+                                </label>
+                                <input type="number" id="m_dep" class="form-input" placeholder="e.g., 0.8" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Mobile Weight (g)
+                                    <span class="tooltiptext">The weight of the mobile device in grams</span>
+                                </label>
+                                <input type="number" id="mobile_wt" class="form-input" placeholder="e.g., 150">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Number of Cores
+                                    <span class="tooltiptext">The number of processing cores in the CPU</span>
+                                </label>
+                                <input type="number" id="n_cores" class="form-input" placeholder="e.g., 8">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Primary Camera (MP)
+                                    <span class="tooltiptext">Resolution of the main rear camera in megapixels</span>
+                                </label>
+                                <input type="number" id="pc" class="form-input" placeholder="e.g., 12">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Pixel Height
+                                    <span class="tooltiptext">The vertical resolution of the display in pixels</span>
+                                </label>
+                                <input type="number" id="px_height" class="form-input" placeholder="e.g., 1920">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Pixel Width
+                                    <span class="tooltiptext">The horizontal resolution of the display in pixels</span>
+                                </label>
+                                <input type="number" id="px_width" class="form-input" placeholder="e.g., 1080">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    RAM (MB)
+                                    <span class="tooltiptext">The amount of random access memory in megabytes</span>
+                                </label>
+                                <input type="number" id="ram" class="form-input" placeholder="e.g., 4096">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Screen Height (cm)
+                                    <span class="tooltiptext">The physical height of the screen</span>
+                                </label>
+                                <input type="number" id="sc_h" class="form-input" placeholder="e.g., 14">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Screen Width (cm)
+                                    <span class="tooltiptext">The physical width of the screen</span>
+                                </label>
+                                <input type="number" id="sc_w" class="form-input" placeholder="e.g., 7">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Talk Time (hours)
+                                    <span class="tooltiptext">The maximum talk time the battery can provide</span>
+                                </label>
+                                <input type="number" id="talk_time" class="form-input" placeholder="e.g., 10">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    3G Support
+                                    <span class="tooltiptext">Whether the device supports 3G networks (0=No, 1=Yes)</span>
+                                </label>
+                                <input type="number" id="three_g" class="form-input" placeholder="0 or 1" min="0" max="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Touch Screen
+                                    <span class="tooltiptext">Whether the device has a touch screen (0=No, 1=Yes)</span>
+                                </label>
+                                <input type="number" id="touch_screen" class="form-input" placeholder="0 or 1" min="0" max="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label tooltip">
+                                    Wi-Fi
+                                    <span class="tooltiptext">Whether the device has Wi-Fi capability (0=No, 1=Yes)</span>
+                                </label>
+                                <input type="number" id="wifi" class="form-input" placeholder="0 or 1" min="0" max="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="predict()">
+                        <i class="fas fa-bolt"></i>
+                        Predict Price Category
+                    </button>
+
+                    <div class="result-container" id="result-container">
+                        <div class="result-card">
+                            <div class="result-label">Predicted Price Range</div>
+                            <div class="result-value" id="result-value">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Developer Section -->
+    <div class="container">
+        <div class="developer-section">
+            <div class="developer-header">
+                <div class="developer-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <div class="developer-title">Developer Information</div>
+            </div>
+            <div class="developer-info">
+                <div class="developer-item">
+                    <div class="developer-label">Name</div>
+                    <div class="developer-value">Shubham Raj</div>
+                </div>
+                <div class="developer-item">
+                    <div class="developer-label">Email</div>
+                    <div class="developer-value">aarushjais407@gmail.com</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>MobilePrice.ai &copy; 2023 | AI-Powered Mobile Price Prediction</p>
+            <p>Model Accuracy: 92.4% | Last Updated: October 2023</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">API Documentation</a>
+                <a href="#">Contact Us</a>
+            </div>
+            <div class="copyright">
+                Powered by Advanced Machine Learning Algorithms
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI Assistant -->
+    <div class="ai-assistant">
+        <div class="ai-pulse"></div>
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <script>
+        // ---------------------------
+        //  HARD-CODED FEATURE IMPORTANCE
+        // ---------------------------
+        const TOP_FEATURES = [
+            { feature: "ram", score: (0.3765464 * 100).toFixed(2) },
+            { feature: "battery_power", score: (0.11468672 * 100).toFixed(2) },
+            { feature: "px_height", score: (0.07633522 * 100).toFixed(2) },
+            { feature: "px_width", score: (0.07564761 * 100).toFixed(2) },
+            { feature: "n_cores", score: (0.03120914 * 100).toFixed(2) }
+        ];
+
+        // ---------------------------
+        //  INITIALIZATION
+        // ---------------------------
+        window.onload = function() {
+            // Populate feature importance list with animated bars
+            let list = document.getElementById("imp-list");
+            TOP_FEATURES.forEach(f => {
+                let li = document.createElement("li");
+                li.className = "feature-item";
+                
+                li.innerHTML = `
+                    <div class="feature-name">${f.feature}</div>
+                    <div class="feature-bar">
+                        <div class="feature-fill" style="width: 0%" data-width="${f.score}%"></div>
+                    </div>
+                    <div class="feature-percent">${f.score}%</div>
+                `;
+                
+                list.appendChild(li);
+            });
+
+            // Animate feature bars after a short delay
+            setTimeout(() => {
+                document.querySelectorAll('.feature-fill').forEach(fill => {
+                    const width = fill.getAttribute('data-width');
+                    fill.style.width = width;
+                });
+            }, 500);
+
+            // Set up expandable sections
+            document.querySelectorAll('.expandable-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    content.classList.toggle('show');
+                });
+            });
+
+            // Set up theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            
+            // Update theme icon
+            updateThemeIcon(currentTheme);
+            
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            function updateThemeIcon(theme) {
+                const icon = themeToggle.querySelector('i');
+                if (theme === 'dark') {
+                    icon.className = 'fas fa-moon';
+                } else {
+                    icon.className = 'fas fa-sun';
+                }
+            }
+
+            // Fade in page elements
+            document.body.style.opacity = 0;
+            let opacity = 0;
+            const fadeIn = setInterval(() => {
+                if (opacity < 1) {
+                    opacity += 0.05;
+                    document.body.style.opacity = opacity;
+                } else {
+                    clearInterval(fadeIn);
+                }
+            }, 50);
+        };
+
+        // ---------------------------
+        //  RANDOM AUTO-FILL GENERATOR
+        // ---------------------------
+        function randomRange(min, max) {
+            return parseFloat((Math.random() * (max - min) + min).toFixed(1));
+        }
+
+        function autoFill() {
+            const rand = {
+                battery_power: Math.floor(randomRange(500, 3000)),
+                blue: Math.round(randomRange(0, 1)),
+                clock_speed: randomRange(0.5, 3.0),
+                dual_sim: Math.round(randomRange(0, 1)),
+                fc: Math.floor(randomRange(0, 15)),
+                four_g: Math.round(randomRange(0, 1)),
+                int_memory: Math.floor(randomRange(4, 256)),
+                m_dep: randomRange(0.1, 1.0),
+                mobile_wt: Math.floor(randomRange(90, 250)),
+                n_cores: Math.floor(randomRange(1, 8)),
+                pc: Math.floor(randomRange(1, 25)),
+                px_height: Math.floor(randomRange(0, 2000)),
+                px_width: Math.floor(randomRange(0, 2500)),
+                ram: Math.floor(randomRange(256, 6000)),
+                sc_h: Math.floor(randomRange(5, 20)),
+                sc_w: Math.floor(randomRange(2, 10)),
+                talk_time: Math.floor(randomRange(2, 22)),
+                three_g: Math.round(randomRange(0, 1)),
+                touch_screen: Math.round(randomRange(0, 1)),
+                wifi: Math.round(randomRange(0, 1))
+            };
+
+            for (let key in rand) {
+                document.getElementById(key).value = rand[key];
+            }
+        }
+
+        // ---------------------------
+        //  PREDICT FUNCTION
+        // ---------------------------
+        function predict() {
+            const features = [
+                "battery_power","blue","clock_speed","dual_sim","fc","four_g",
+                "int_memory","m_dep","mobile_wt","n_cores","pc","px_height",
+                "px_width","ram","sc_h","sc_w","talk_time","three_g",
+                "touch_screen","wifi"
+            ];
+
+            let data = {};
+            let valid = true;
+            
+            features.forEach(f => {
+                const value = parseFloat(document.getElementById(f).value);
+                if (isNaN(value)) {
+                    valid = false;
+                    document.getElementById(f).style.borderColor = "#ef4444";
+                } else {
+                    data[f] = value;
+                    document.getElementById(f).style.borderColor = "";
+                }
+            });
+
+            if (!valid) {
+                alert("Please fill in all fields with valid numbers");
+                return;
+            }
+
+            // Show loading state
+            const resultContainer = document.getElementById("result-container");
+            const resultValue = document.getElementById("result-value");
+            resultValue.textContent = "Analyzing...";
+            resultContainer.classList.add("show");
+
+            // Send request to backend
+            fetch("/predict", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(res => {
+                // Animate result display
+                setTimeout(() => {
+                    resultValue.textContent = res.label || "Unknown";
+                    resultValue.style.animation = "pulse 1s";
+                    setTimeout(() => {
+                        resultValue.style.animation = "";
+                    }, 1000);
+                }, 800);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                resultValue.textContent = "Error";
+                setTimeout(() => {
+                    resultValue.textContent = "Connection Error";
+                }, 800);
+            });
+        }
+    </script>
+</body>
+</html>
